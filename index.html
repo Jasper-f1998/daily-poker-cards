@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>每日扑克牌</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
+    <style>
+        .cards-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 50px;
+        }
+        .card {
+            width: 120px;
+            height: 180px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            background: white;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
+        }
+        .suit-red { color: red; }
+        .suit-black { color: black; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">今日的三张牌</h1>
+    <p style="text-align: center; color: #666;">更新时间：每日18:00（北京时间）</p >
+    <div class="cards-container" id="cards"></div>
+
+    <script>
+        function generateDailyCards() {
+            // 获取北京时间
+            const now = new Date();
+            const cnTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3600000 * 8));
+            
+            // 确定当日种子（18点后更新）
+            const seedDate = new Date(cnTime);
+            seedDate.setHours(cnTime.getHours() >= 18 ? 0 : -24, 0, 0, 0);
+            const seed = seedDate.toISOString().slice(0,10);
+            
+            // 初始化随机数
+            Math.seedrandom(seed);
+            
+            // 创建牌组
+            const suits = [
+                { symbol: '♠', color: 'black' },
+                { symbol: '♥', color: 'red' },
+                { symbol: '♦', color: 'red' },
+                { symbol: '♣', color: 'black' }
+            ];
+            const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            
+            // 洗牌算法
+            let deck = [];
+            for (const suit of suits) {
+                for (const value of values) {
+                    deck.push({...suit, value});
+                }
+            }
+            
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+
+            // 显示前三张
+            const container = document.getElementById('cards');
+            container.innerHTML = deck.slice(0,3).map(card => `
+                <div class="card">
+                    <div class="suit-${card.color}">${card.symbol}</div>
+                    <div class="suit-${card.color}">${card.value}</div>
+                </div>
+            `).join('');
+        }
+
+        generateDailyCards();
+    </script>
+</body>
+</html>
